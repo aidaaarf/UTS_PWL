@@ -7,7 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserModel extends Model
 {
-    protected $table = 'user'; // pastikan ini sesuai dengan nama tabel kamu
+
+protected $table = 'user';
+
+protected $primaryKey = 'id';
 
     protected $fillable = [
         'role',
