@@ -45,6 +45,7 @@ class KategoriController extends Controller
 
     public function store(Request $request)
     {
+        // validasi dulu
         $validator = Validator::make($request->all(), [
             'kode' => 'required|unique:kategori,kode',
             'nama' => 'required'
@@ -57,7 +58,7 @@ class KategoriController extends Controller
                 'msgField' => $validator->errors()
             ]);
         }
-
+       // masukkan di database
         KategoriModel::create([
             'kode' => $request->kode,
             'nama' => $request->nama,
@@ -144,20 +145,31 @@ class KategoriController extends Controller
     public function delete(Request $request, $id)
     {
         if ($request->ajax() || $request->wantsJson()) {
-            $kategori = KategoriModel::find($id);
-            if ($kategori) {
-                $kategori->delete();
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Data berhasil dihapus'
-                ]);
-            } else {
+            $kategori = KategoriModel::with('barang')->find($id);
+    
+            if (!$kategori) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Data tidak ditemukan'
                 ]);
             }
+    
+            if ($kategori->barang->count() > 0) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Kategori tidak dapat dihapus karena sudah digunakan di data barang.'
+                ]);
+            }
+    
+            $kategori->delete();
+    
+            return response()->json([
+                'status' => true,
+                'message' => 'Data berhasil dihapus'
+            ]);
         }
+    
         return redirect('/');
     }
+    
 }
